@@ -1,0 +1,41 @@
+seller_id,category,region
+1,Produce,Chicago
+2,Beverages,Detroit
+3,Dry Goods,Indianapolis
+4,Bakery,Milwaukee
+5,Bakery,Chicago
+6,Packaging,Detroit
+7,Produce,Milwaukee
+8,Dry Goods,Detroit
+9,Dairy,Indianapolis
+10,Produce,Detroit
+11,Bakery,Detroit
+12,Packaging,Chicago
+13,Beverages,Milwaukee
+14,Beverages,Milwaukee
+15,Beverages,Milwaukee
+16,Beverages,Chicago
+17,Bakery,Indianapolis
+18,Produce,Chicago
+19,Beverages,Indianapolis
+20,Bakery,Indianapolis
+21,Bakery,Detroit
+22,Meat,Indianapolis
+23,Dairy,Milwaukee
+24,Packaging,Detroit
+25,Beverages,Milwaukee
+26,Dry Goods,Milwaukee
+27,Meat,Detroit
+28,Beverages,Milwaukee
+29,Bakery,Chicago
+30,Bakery,Milwaukee
+31,Bakery,Detroit
+32,Dairy,Chicago
+33,Produce,Milwaukee
+34,Bakery,Chicago
+35,Packaging,Indianapolis
+36,Produce,Milwaukee
+37,Packaging,Milwaukee
+38,Beverages,Chicago
+39,Dairy,Indianapolis
+40,Dry Goods,Indianapolis

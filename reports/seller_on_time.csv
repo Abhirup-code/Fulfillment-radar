@@ -1,0 +1,41 @@
+seller_id,category,region,delivered_orders,on_time_pct,gmv
+7,Produce,Milwaukee,87,64.4,24430.73
+36,Produce,Milwaukee,97,86.6,24866.06
+12,Packaging,Chicago,91,86.8,21168.04
+30,Bakery,Milwaukee,87,87.4,26032.38
+15,Beverages,Milwaukee,113,88.5,60044.74
+10,Produce,Detroit,90,88.9,25247.0
+25,Beverages,Milwaukee,108,88.9,53945.07
+27,Meat,Detroit,108,88.9,87556.09
+3,Dry Goods,Indianapolis,91,89.0,44818.64
+24,Packaging,Detroit,97,89.7,23511.87
+39,Dairy,Indianapolis,120,90.0,48344.69
+28,Beverages,Milwaukee,101,90.1,48306.34
+16,Beverages,Chicago,117,91.5,62570.38
+19,Beverages,Indianapolis,95,91.6,46696.51
+34,Bakery,Chicago,74,91.9,22684.47
+2,Beverages,Detroit,100,92.0,50736.75
+11,Bakery,Detroit,100,92.0,32340.6
+20,Bakery,Indianapolis,89,92.1,27010.21
+35,Packaging,Indianapolis,77,92.2,20020.33
+5,Bakery,Chicago,91,92.3,28689.06
+14,Beverages,Milwaukee,107,92.5,54613.77
+33,Produce,Milwaukee,86,93.0,24684.26
+40,Dry Goods,Indianapolis,100,93.0,41623.12
+23,Dairy,Milwaukee,119,93.3,45329.33
+31,Bakery,Detroit,93,93.5,30403.7
+6,Packaging,Detroit,97,93.8,21408.26
+18,Produce,Chicago,66,93.9,17522.57
+38,Beverages,Chicago,98,93.9,50800.59
+1,Produce,Chicago,90,94.4,25847.83
+22,Meat,Indianapolis,90,94.4,68356.02
+26,Dry Goods,Milwaukee,93,94.6,38043.82
+32,Dairy,Chicago,93,94.6,33159.42
+9,Dairy,Indianapolis,98,94.9,38032.56
+17,Bakery,Indianapolis,102,95.1,31012.29
+4,Bakery,Milwaukee,84,95.2,26577.14
+13,Beverages,Milwaukee,85,95.3,40147.93
+29,Bakery,Chicago,108,95.4,35550.92
+37,Packaging,Milwaukee,81,96.3,18923.28
+8,Dry Goods,Detroit,75,97.3,31434.38
+21,Bakery,Detroit,101,98.0,30286.35
