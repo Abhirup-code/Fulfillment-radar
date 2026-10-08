@@ -14,9 +14,19 @@ SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, ord
 | Do repeat buyers matter more than one-time buyers? | repeat_vs_one_time |
 | Which categories earn the most? | category_performance |
 
-Results are written to `reports/` as CSV files, three charts, and a short written summary in [`reports/FINDINGS.md`](reports/FINDINGS.md).
+Results are written to `reports/` as CSV files, five charts, and a short written summary in [`reports/FINDINGS.md`](reports/FINDINGS.md).
+
+## Charts
+
+![Monthly GMV](reports/charts/monthly_gmv.png)
 
 ![Cancellation rate](reports/charts/cancellation_rate.png)
+
+![Lowest on-time sellers](reports/charts/seller_on_time.png)
+
+![Repeat vs one-time buyers](reports/charts/repeat_vs_one_time.png)
+
+![GMV by category](reports/charts/category_gmv.png)
 
 ## Run it
 

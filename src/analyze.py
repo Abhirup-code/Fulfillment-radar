@@ -50,6 +50,23 @@ def charts(r, outdir):
     ax.tick_params(axis="x", rotation=45)
     fig.tight_layout(); fig.savefig(outdir / "cancellation_rate.png", dpi=130); plt.close(fig)
 
+    cat = r["category_performance"]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.bar(cat["category"], cat["gmv"], color="#2f855a")
+    ax.set_title("GMV by category")
+    ax.set_ylabel("GMV ($)")
+    ax.tick_params(axis="x", rotation=30)
+    fig.tight_layout(); fig.savefig(outdir / "category_gmv.png", dpi=130); plt.close(fig)
+
+    rv = r["repeat_vs_one_time"]
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    axes[0].bar(rv["segment"], rv["buyers"], color=["#718096", "#2b6cb0"])
+    axes[0].set_title("Buyers")
+    axes[1].bar(rv["segment"], rv["total_spend"], color=["#718096", "#2b6cb0"])
+    axes[1].set_title("Total spend ($)")
+    fig.suptitle("Repeat vs one-time buyers")
+    fig.tight_layout(); fig.savefig(outdir / "repeat_vs_one_time.png", dpi=130); plt.close(fig)
+
     s = r["seller_on_time"].head(10)
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.barh(s["seller_id"].astype(str), s["on_time_pct"], color="#dd6b20")
