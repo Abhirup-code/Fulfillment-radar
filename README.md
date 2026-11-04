@@ -47,4 +47,6 @@ The tests check that the data is deterministic, that there are no orphan foreign
 - **On-time** means delivered within the promised number of days.
 - **Repeat buyer** means two or more non-cancelled orders.
 
+## License
 
+[Apache 2.0](LICENSE). Copyright 2026 Abhirup Khan.
