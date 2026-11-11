@@ -44,12 +44,22 @@ Results are written to `reports/` as CSV files, charts, and a short written summ
 pip install -r requirements.txt
 python src/generate_data.py      # writes data/*.csv (seeded, so the output is repeatable)
 python -m src.analyze            # loads SQLite, runs the SQL, writes reports/
-python -m pytest -v              # 7 tests
+python -m pytest -v              # 29 tests
 ```
 
-## Tests
+## Tests and checks
 
-The tests check that the data is deterministic, that there are no orphan foreign keys, that order ids are unique, that GMV from the SQL matches the raw CSV, and that the built-in patterns (the August cancellation spike, the late seller, repeat buyers spending more) are found.
+Before any KPI is computed, `src/validate.py` checks the raw data: duplicate ids, zero or negative
+amounts, unknown statuses, delivery times that don't match the status, orders from unknown buyers or
+sellers, unreadable dates, and orders placed before the buyer signed up. If anything fails, no reports
+are written.
+
+The tests check that the data is deterministic, that GMV from the SQL matches the raw CSV, that each data
+check fires on bad rows, that the drill-down and cohort numbers match an independent pandas recount, that
+the confidence intervals match known values, and that the built-in patterns are found.
+
+CI runs ruff, rebuilds the data and reports, fails if the committed CSVs or findings no longer match the
+code, and runs the tests with a 90% coverage floor.
 
 ## Definitions
 

@@ -1,4 +1,5 @@
 import pandas as pd
+
 from src.analyze import build_db, run_all
 from src.generate_data import generate
 
@@ -78,7 +79,6 @@ def test_only_the_planted_late_seller_is_flagged():
     assert (f.ci_low_pct <= f.on_time_pct).all() and (f.on_time_pct <= f.ci_high_pct).all()
 
 
-
 def test_the_report_builds_end_to_end(tmp_path):
     from src.analyze import main
 
@@ -93,7 +93,9 @@ def test_the_report_builds_end_to_end(tmp_path):
 def test_every_buyer_with_an_order_is_in_exactly_one_cohort():
     con = build_db()
     cr = run_all(con)["cohort_retention"]
-    buyers = con.execute("SELECT COUNT(DISTINCT buyer_id) FROM orders WHERE status != 'cancelled'").fetchone()[0]
+    buyers = con.execute(
+        "SELECT COUNT(DISTINCT buyer_id) FROM orders WHERE status != 'cancelled'"
+    ).fetchone()[0]
     sizes = cr.drop_duplicates("cohort")["cohort_buyers"].sum()
     # Buyers whose first order is in the final month have no later month to measure, so no row.
     last = con.execute("""SELECT COUNT(*) FROM (SELECT buyer_id, MIN(substr(order_date,1,7)) AS c

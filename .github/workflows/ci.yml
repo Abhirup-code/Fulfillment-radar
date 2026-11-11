@@ -21,8 +21,22 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-          cache-dependency-path: requirements.txt
-      - run: pip install -r requirements.txt
-      - run: python src/generate_data.py
-      - run: python -m src.analyze
-      - run: python -m pytest -v
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Lint and format
+        run: ruff check . && ruff format --check .
+      - name: Rebuild the data and the reports
+        run: |
+          python src/generate_data.py
+          python -m src.analyze
+      - name: Committed data and reports match the code
+        # Charts are left out: PNG bytes can differ between machines even when the picture is the same.
+        run: |
+          if ! git diff --exit-code --stat -- data reports ':!reports/charts'; then
+            echo "::error::data/ or reports/ is out of date. Run generate_data.py and src.analyze, then commit."
+            exit 1
+          fi
+      - name: Tests, with at least 90% coverage
+        run: python -m pytest -v --cov

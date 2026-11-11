@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 
 from src.analyze import load_csvs, main
@@ -23,8 +22,14 @@ def test_the_generated_data_is_clean():
         (lambda s, b, o: o.loc.__setitem__((0, "promised_days"), 0), "1 orders promised in under 1 day"),
         (lambda s, b, o: o.loc.__setitem__((0, "buyer_id"), 99999), "1 orders from an unknown buyer"),
         (lambda s, b, o: o.loc.__setitem__((0, "seller_id"), 99999), "1 orders from an unknown seller"),
-        (lambda s, b, o: o.loc.__setitem__((0, "order_date"), "not a date"), "1 orders with a missing or unreadable"),
-        (lambda s, b, o: o.loc.__setitem__((0, "order_date"), "2020-01-01"), "1 orders placed before the buyer"),
+        (
+            lambda s, b, o: o.loc.__setitem__((0, "order_date"), "not a date"),
+            "1 orders with a missing or unreadable",
+        ),
+        (
+            lambda s, b, o: o.loc.__setitem__((0, "order_date"), "2020-01-01"),
+            "1 orders placed before the buyer",
+        ),
         (lambda s, b, o: s.loc.__setitem__((1, "seller_id"), s.seller_id[0]), "1 duplicate seller ids"),
         (lambda s, b, o: b.loc.__setitem__((1, "buyer_id"), b.buyer_id[0]), "1 duplicate buyer ids"),
     ],

@@ -10,8 +10,17 @@ STATUSES = {"delivered", "cancelled", "disputed"}
 COLUMNS = {
     "sellers": ["seller_id", "category", "region"],
     "buyers": ["buyer_id", "region", "signup_date"],
-    "orders": ["order_id", "buyer_id", "seller_id", "order_date", "quantity",
-               "amount", "status", "promised_days", "actual_days"],
+    "orders": [
+        "order_id",
+        "buyer_id",
+        "seller_id",
+        "order_date",
+        "quantity",
+        "amount",
+        "status",
+        "promised_days",
+        "actual_days",
+    ],
 }
 
 
@@ -41,7 +50,10 @@ def check(sellers: pd.DataFrame, buyers: pd.DataFrame, orders: pd.DataFrame) -> 
     bad(~(o.promised_days >= 1), "orders promised in under 1 day")
     cancelled = o.status == "cancelled"
     bad(cancelled & o.actual_days.notna(), "cancelled orders with a delivery time")
-    bad(~cancelled & o.status.isin(STATUSES) & o.actual_days.isna(), "delivered or disputed orders with no delivery time")
+    bad(
+        ~cancelled & o.status.isin(STATUSES) & o.actual_days.isna(),
+        "delivered or disputed orders with no delivery time",
+    )
     bad(~o.buyer_id.isin(buyers.buyer_id), "orders from an unknown buyer")
     bad(~o.seller_id.isin(sellers.seller_id), "orders from an unknown seller")
 
