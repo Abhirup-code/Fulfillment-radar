@@ -7,6 +7,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from src.validate import check
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -119,7 +121,15 @@ was **{cat['category']}** (${cat['gmv']:,.0f}).
 """
 
 
+def load_csvs(data_dir=ROOT / "data"):
+    return [pd.read_csv(Path(data_dir) / f"{t}.csv") for t in ("sellers", "buyers", "orders")]
+
+
 def main():
+    problems = check(*load_csvs())
+    if problems:
+        raise SystemExit("Data checks failed, so no reports were written:\n- " + "\n- ".join(problems))
+    print("Data checks passed.")
     con = build_db()
     r = run_all(con)
     out = ROOT / "reports"
