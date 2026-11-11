@@ -7,6 +7,17 @@ SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, ord
 
 **The data is synthetic.** I generated it with a script (`src/generate_data.py`) and built a few patterns in on purpose, so the analysis has something to find. Nothing comes from a real company. The project shows the method: define KPIs in SQL, check them with tests, and turn the numbers into recommendations.
 
+## Key findings
+
+From [`reports/FINDINGS.md`](reports/FINDINGS.md), on the synthetic data:
+
+1. **Cancellations spiked to 16.3% in August 2025**, against about 3% normally, and the rate rose in
+   every region and category at once. That points to a marketplace-wide cause, not one bad seller.
+2. **Only 1 of 40 sellers is reliably late** (seller 7, on time 64% of the time). 15 others look low
+   in a ranking but are too close to call once you account for sample size.
+3. **Repeat buyers are 65% of buyers but 94% of spend**, and only about **42%** of new buyers order
+   again the next month. The second order is the biggest lever.
+
 ## What it answers
 
 | Question | Where |
