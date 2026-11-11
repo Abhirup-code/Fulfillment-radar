@@ -58,3 +58,29 @@ ORDER BY gmv DESC;
 SELECT buyer_id, COUNT(*) AS orders, ROUND(SUM(amount), 2) AS spend
 FROM orders WHERE status != 'cancelled'
 GROUP BY buyer_id ORDER BY spend DESC LIMIT 10;
+
+-- name: cancellation_drilldown
+-- Was the worst cancellation month caused by one region or category, or by everything at once?
+-- Compares each group's cancellation rate in that month against the rest of the year.
+WITH monthly AS (
+  SELECT substr(order_date, 1, 7) AS month, AVG(status = 'cancelled') AS rate
+  FROM orders GROUP BY month
+),
+peak AS (SELECT month FROM monthly ORDER BY rate DESC, month LIMIT 1),
+tagged AS (
+  SELECT CASE WHEN substr(o.order_date, 1, 7) = (SELECT month FROM peak) THEN 1 ELSE 0 END AS in_peak,
+         o.status = 'cancelled' AS cancelled, s.category, s.region AS seller_region, b.region AS buyer_region
+  FROM orders o JOIN sellers s USING (seller_id) JOIN buyers b USING (buyer_id)
+),
+grouped AS (
+  SELECT 'buyer region' AS dimension, buyer_region AS value, in_peak, cancelled FROM tagged
+  UNION ALL SELECT 'seller region', seller_region, in_peak, cancelled FROM tagged
+  UNION ALL SELECT 'category', category, in_peak, cancelled FROM tagged
+)
+SELECT (SELECT month FROM peak) AS peak_month, dimension, value,
+       SUM(in_peak) AS peak_orders,
+       ROUND(100.0 * SUM(in_peak AND cancelled) / SUM(in_peak), 1) AS peak_cancel_pct,
+       ROUND(100.0 * SUM(NOT in_peak AND cancelled) / SUM(NOT in_peak), 1) AS other_cancel_pct
+FROM grouped
+GROUP BY dimension, value
+ORDER BY dimension, value;

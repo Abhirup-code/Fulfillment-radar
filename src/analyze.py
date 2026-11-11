@@ -69,6 +69,17 @@ def charts(r, outdir):
     fig.suptitle("Repeat vs one-time buyers")
     fig.tight_layout(); fig.savefig(outdir / "repeat_vs_one_time.png", dpi=130); plt.close(fig)
 
+    d = r["cancellation_drilldown"]
+    d = d[d["dimension"] == "category"]
+    x = range(len(d))
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.bar([i - 0.2 for i in x], d["other_cancel_pct"], width=0.4, color="#718096", label="Rest of the year")
+    ax.bar([i + 0.2 for i in x], d["peak_cancel_pct"], width=0.4, color="#c53030", label=d["peak_month"].iloc[0])
+    ax.set_xticks(list(x), d["value"], rotation=30)
+    ax.set_title("Cancellation rate by category: the spike month vs the rest (%)")
+    ax.legend()
+    fig.tight_layout(); fig.savefig(outdir / "cancellation_drilldown.png", dpi=130); plt.close(fig)
+
     s = r["seller_on_time"].head(10)
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.barh(s["seller_id"].astype(str), s["on_time_pct"], color="#dd6b20")
@@ -80,6 +91,7 @@ def charts(r, outdir):
 
 def findings(r):
     m, c, s = r["monthly_kpis"], r["cancellation_rate_by_month"], r["seller_on_time"]
+    d = r["cancellation_drilldown"]
     rv = r["repeat_vs_one_time"].set_index("segment")
     worst = s.iloc[0]
     peak = c.loc[c["cancel_rate_pct"].idxmax()]
@@ -95,9 +107,15 @@ They show the method, not real business results.
 
 ## 1. Cancellations spiked in {peak['month']}
 The cancellation rate hit **{peak['cancel_rate_pct']}%** in {peak['month']}, against a typical
-month of about **{typical}%**. In a real business I would next check whether the spike
-came from one seller, one region, or one product category, and whether it lines up
-with a stock-out, a pricing change, or a delivery problem.
+month of about **{typical}%**.
+
+**It was not one region or one category.** In {peak['month']} the rate rose in every buyer region,
+every seller region, and every category, to between **{d['peak_cancel_pct'].min()}%** and
+**{d['peak_cancel_pct'].max()}%**, while each of them stayed between {d['other_cancel_pct'].min()}% and
+{d['other_cancel_pct'].max()}% the rest of the year (see `cancellation_drilldown.csv`). The smallest
+groups swing the most, because a few orders move their rate a lot.
+When everything moves together, the cause is usually marketplace-wide: a checkout or payment
+problem, a policy or pricing change, or a stock-out across many sellers. That is where I would look next.
 
 ## 2. One seller drags down delivery performance
 Seller **{int(worst['seller_id'])}** ({worst['category']}, {worst['region']}) delivers on time

@@ -44,3 +44,18 @@ def test_late_seller_is_lowest_on_time():
 def test_repeat_buyers_spend_more():
     r = run_all(build_db()).get("repeat_vs_one_time").set_index("segment")
     assert r.loc["repeat", "avg_spend"] > r.loc["one-time", "avg_spend"]
+
+
+def test_the_spike_drilldown_finds_it_everywhere_not_in_one_group():
+    d = run_all(build_db())["cancellation_drilldown"]
+    assert set(d["peak_month"]) == {"2025-08"}
+    assert set(d["dimension"]) == {"buyer region", "seller region", "category"}
+    # The planted spike is marketplace-wide, so every group at least doubles.
+    assert (d["peak_cancel_pct"] > 2 * d["other_cancel_pct"]).all(), d
+
+
+def test_the_drilldown_covers_every_order_once_per_dimension():
+    con = build_db()
+    d = run_all(con)["cancellation_drilldown"]
+    peak_orders = con.execute("SELECT COUNT(*) FROM orders WHERE order_date LIKE '2025-08%'").fetchone()[0]
+    assert (d.groupby("dimension")["peak_orders"].sum() == peak_orders).all()

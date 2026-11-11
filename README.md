@@ -13,17 +13,20 @@ SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, ord
 |---|---|
 | How are GMV, orders, and average order value trending? | `sql/kpis.sql` (monthly_kpis) |
 | When did cancellations spike? | cancellation_rate_by_month |
+| Was the spike one region or category, or everywhere? | cancellation_drilldown |
 | Which sellers deliver late? | seller_on_time |
 | Do repeat buyers matter more than one-time buyers? | repeat_vs_one_time |
 | Which categories earn the most? | category_performance |
 
-Results are written to `reports/` as CSV files, five charts, and a short written summary in [`reports/FINDINGS.md`](reports/FINDINGS.md).
+Results are written to `reports/` as CSV files, charts, and a short written summary in [`reports/FINDINGS.md`](reports/FINDINGS.md).
 
 ## Charts
 
 ![Monthly GMV](reports/charts/monthly_gmv.png)
 
 ![Cancellation rate](reports/charts/cancellation_rate.png)
+
+![Cancellation rate by category, spike month vs the rest](reports/charts/cancellation_drilldown.png)
 
 ![Lowest on-time sellers](reports/charts/seller_on_time.png)
 

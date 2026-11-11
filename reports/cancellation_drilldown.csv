@@ -1,0 +1,16 @@
+peak_month,dimension,value,peak_orders,peak_cancel_pct,other_cancel_pct
+2025-08,buyer region,Chicago,145,15.2,3.7
+2025-08,buyer region,Detroit,56,25.0,4.2
+2025-08,buyer region,Indianapolis,49,16.3,3.9
+2025-08,buyer region,Milwaukee,111,13.5,4.1
+2025-08,category,Bakery,88,14.8,3.2
+2025-08,category,Beverages,93,19.4,3.5
+2025-08,category,Dairy,41,12.2,4.4
+2025-08,category,Dry Goods,28,17.9,3.7
+2025-08,category,Meat,28,10.7,3.9
+2025-08,category,Packaging,40,17.5,3.8
+2025-08,category,Produce,43,18.6,5.7
+2025-08,seller region,Chicago,65,12.3,4.3
+2025-08,seller region,Detroit,99,17.2,4.1
+2025-08,seller region,Indianapolis,81,14.8,3.5
+2025-08,seller region,Milwaukee,116,19.0,3.8
