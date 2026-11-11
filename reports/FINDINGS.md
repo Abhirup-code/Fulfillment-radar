@@ -15,11 +15,18 @@ groups swing the most, because a few orders move their rate a lot.
 When everything moves together, the cause is usually marketplace-wide: a checkout or payment
 problem, a policy or pricing change, or a stock-out across many sellers. That is where I would look next.
 
-## 2. One seller drags down delivery performance
+## 2. One seller is reliably late, and the next few are not
 Seller **7** (Produce, Milwaukee) delivers on time
-only **64.4%** of the time across 87 orders.
-Recommendation: review this seller's promised delivery windows, and flag late orders
-before the buyer has to ask.
+only **64.4%** of the time across 87 orders. Even the top of its
+95% confidence interval (53.9% to 73.6%) is under the 85% target, so this is
+not bad luck.
+
+The next lowest sellers (86.6% to 87.4% on time) look worrying in a ranked
+list, but they are not clearly below target: 15 sellers are **too close to call**, because their
+intervals still include 85%. Their low rank may just be chance, and chasing them would mean
+chasing noise. Only 1 of 40 sellers is reliably below target (`seller_flags.csv`).
+Recommendation: review seller 7's promised delivery windows, flag its late orders
+before the buyer has to ask, and recheck the "too close to call" sellers once they have more orders.
 
 ## 3. Repeat buyers carry the revenue
 Repeat buyers are 508 of 778 buyers but account for

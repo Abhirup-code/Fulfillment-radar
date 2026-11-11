@@ -15,6 +15,7 @@ SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, ord
 | When did cancellations spike? | cancellation_rate_by_month |
 | Was the spike one region or category, or everywhere? | cancellation_drilldown |
 | Which sellers deliver late? | seller_on_time |
+| Which of them are really below target, not just unlucky? | seller_flags (95% confidence intervals) |
 | Do repeat buyers matter more than one-time buyers? | repeat_vs_one_time |
 | Which categories earn the most? | category_performance |
 
@@ -50,7 +51,9 @@ The tests check that the data is deterministic, that there are no orphan foreign
 ## Definitions
 
 - **GMV / AOV** exclude cancelled orders.
-- **On-time** means delivered within the promised number of days.
+- **On-time** means delivered within the promised number of days. The target is 85%.
+- **Below target** means even the top of a seller's 95% Wilson confidence interval is under 85%.
+  Sellers whose interval includes 85% are "too close to call", not flagged.
 - **Repeat buyer** means two or more non-cancelled orders.
 
 ## License

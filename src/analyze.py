@@ -1,4 +1,5 @@
 """Load the CSVs into SQLite, run the KPI queries, and write tables, charts and findings."""
+import math
 import re
 import sqlite3
 from pathlib import Path
@@ -30,7 +31,41 @@ def load_queries():
 
 
 def run_all(con):
-    return {name: pd.read_sql_query(sql, con) for name, sql in load_queries().items()}
+    r = {name: pd.read_sql_query(sql, con) for name, sql in load_queries().items()}
+    r["seller_flags"] = seller_flags(r["seller_on_time"])
+    return r
+
+
+ON_TIME_TARGET = 85.0  # the on-time rate a seller is expected to hold, in percent
+
+
+def wilson(successes, n, z=1.96):
+    """95% Wilson score interval for a rate, in percent. It stays sensible for small samples,
+    where the plain +/- formula breaks down."""
+    if n == 0:
+        return 0.0, 100.0
+    p = successes / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    return round(100 * (centre - half), 1), round(100 * (centre + half), 1)
+
+
+def seller_flags(seller_on_time, target=ON_TIME_TARGET):
+    """Which sellers are below the on-time target for sure, and which only look low by chance.
+
+    A seller is flagged only when even the top of its 95% interval is under the target.
+    """
+    out = seller_on_time[["seller_id", "category", "region", "delivered_orders", "on_time_pct"]].copy()
+    bounds = [wilson(round(r.on_time_pct * r.delivered_orders / 100), r.delivered_orders)
+              for r in out.itertuples()]
+    out["ci_low_pct"] = [b[0] for b in bounds]
+    out["ci_high_pct"] = [b[1] for b in bounds]
+    out["status"] = [
+        "below target" if hi < target else "meets target" if lo >= target else "too close to call"
+        for lo, hi in bounds
+    ]
+    return out
 
 
 def charts(r, outdir):
@@ -92,6 +127,11 @@ def charts(r, outdir):
 def findings(r):
     m, c, s = r["monthly_kpis"], r["cancellation_rate_by_month"], r["seller_on_time"]
     d = r["cancellation_drilldown"]
+    f = r["seller_flags"]
+    target = ON_TIME_TARGET
+    worst_flag = f.iloc[0]
+    flagged = int((f["status"] == "below target").sum())
+    close = int((f["status"] == "too close to call").sum())
     rv = r["repeat_vs_one_time"].set_index("segment")
     worst = s.iloc[0]
     peak = c.loc[c["cancel_rate_pct"].idxmax()]
@@ -117,11 +157,18 @@ groups swing the most, because a few orders move their rate a lot.
 When everything moves together, the cause is usually marketplace-wide: a checkout or payment
 problem, a policy or pricing change, or a stock-out across many sellers. That is where I would look next.
 
-## 2. One seller drags down delivery performance
+## 2. One seller is reliably late, and the next few are not
 Seller **{int(worst['seller_id'])}** ({worst['category']}, {worst['region']}) delivers on time
-only **{worst['on_time_pct']}%** of the time across {int(worst['delivered_orders'])} orders.
-Recommendation: review this seller's promised delivery windows, and flag late orders
-before the buyer has to ask.
+only **{worst['on_time_pct']}%** of the time across {int(worst['delivered_orders'])} orders. Even the top of its
+95% confidence interval ({worst_flag['ci_low_pct']}% to {worst_flag['ci_high_pct']}%) is under the {target:g}% target, so this is
+not bad luck.
+
+The next lowest sellers ({f.iloc[1]['on_time_pct']}% to {f.iloc[min(3, len(f) - 1)]['on_time_pct']}% on time) look worrying in a ranked
+list, but they are not clearly below target: {close} sellers are **too close to call**, because their
+intervals still include {target:g}%. Their low rank may just be chance, and chasing them would mean
+chasing noise. Only {flagged} of {len(f)} sellers is reliably below target (`seller_flags.csv`).
+Recommendation: review seller {int(worst['seller_id'])}'s promised delivery windows, flag its late orders
+before the buyer has to ask, and recheck the "too close to call" sellers once they have more orders.
 
 ## 3. Repeat buyers carry the revenue
 Repeat buyers are {int(rep['buyers'])} of {int(rep['buyers'] + one['buyers'])} buyers but account for
@@ -143,15 +190,15 @@ def load_csvs(data_dir=ROOT / "data"):
     return [pd.read_csv(Path(data_dir) / f"{t}.csv") for t in ("sellers", "buyers", "orders")]
 
 
-def main():
+def main(out=ROOT / "reports"):
     problems = check(*load_csvs())
     if problems:
         raise SystemExit("Data checks failed, so no reports were written:\n- " + "\n- ".join(problems))
     print("Data checks passed.")
     con = build_db()
     r = run_all(con)
-    out = ROOT / "reports"
-    out.mkdir(exist_ok=True)
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
     for k, v in r.items():
         v.to_csv(out / f"{k}.csv", index=False)
     charts(r, out / "charts")

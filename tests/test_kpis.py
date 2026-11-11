@@ -59,3 +59,32 @@ def test_the_drilldown_covers_every_order_once_per_dimension():
     d = run_all(con)["cancellation_drilldown"]
     peak_orders = con.execute("SELECT COUNT(*) FROM orders WHERE order_date LIKE '2025-08%'").fetchone()[0]
     assert (d.groupby("dimension")["peak_orders"].sum() == peak_orders).all()
+
+
+def test_wilson_interval_matches_known_values():
+    from src.analyze import wilson
+
+    assert wilson(50, 100) == (40.4, 59.6)
+    assert wilson(0, 0) == (0.0, 100.0)
+    lo, hi = wilson(10, 10)
+    assert hi == 100.0 and lo < 100
+
+
+def test_only_the_planted_late_seller_is_flagged():
+    f = run_all(build_db())["seller_flags"]
+    assert f.loc[f.status == "below target", "seller_id"].tolist() == [7]
+    # The next lowest seller looks low but its interval still reaches the target.
+    assert f.iloc[1]["status"] == "too close to call"
+    assert (f.ci_low_pct <= f.on_time_pct).all() and (f.on_time_pct <= f.ci_high_pct).all()
+
+
+
+def test_the_report_builds_end_to_end(tmp_path):
+    from src.analyze import main
+
+    out = tmp_path / "reports"
+    main(out)
+    text = (out / "FINDINGS.md").read_text()
+    assert "Seller **7**" in text and "too close to call" in text
+    assert (out / "seller_flags.csv").exists()
+    assert len(list((out / "charts").glob("*.png"))) == 6
