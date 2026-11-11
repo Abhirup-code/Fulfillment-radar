@@ -1,5 +1,8 @@
 # Fulfillment Radar
 
+[![CI](https://github.com/Abhirup-code/Fulfillment-radar/actions/workflows/ci.yml/badge.svg)](https://github.com/Abhirup-code/Fulfillment-radar/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, order value, cancellations, seller delivery performance, and repeat-buyer behavior.
 
 **The data is synthetic.** I generated it with a script (`src/generate_data.py`) and built a few patterns in on purpose, so the analysis has something to find. Nothing comes from a real company. The project shows the method: define KPIs in SQL, check them with tests, and turn the numbers into recommendations.
