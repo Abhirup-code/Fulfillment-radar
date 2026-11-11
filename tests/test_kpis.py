@@ -87,4 +87,27 @@ def test_the_report_builds_end_to_end(tmp_path):
     text = (out / "FINDINGS.md").read_text()
     assert "Seller **7**" in text and "too close to call" in text
     assert (out / "seller_flags.csv").exists()
-    assert len(list((out / "charts").glob("*.png"))) == 6
+    assert len(list((out / "charts").glob("*.png"))) == 7
+
+
+def test_every_buyer_with_an_order_is_in_exactly_one_cohort():
+    con = build_db()
+    cr = run_all(con)["cohort_retention"]
+    buyers = con.execute("SELECT COUNT(DISTINCT buyer_id) FROM orders WHERE status != 'cancelled'").fetchone()[0]
+    sizes = cr.drop_duplicates("cohort")["cohort_buyers"].sum()
+    # Buyers whose first order is in the final month have no later month to measure, so no row.
+    last = con.execute("""SELECT COUNT(*) FROM (SELECT buyer_id, MIN(substr(order_date,1,7)) AS c
+        FROM orders WHERE status != 'cancelled' GROUP BY buyer_id) WHERE c = '2025-12'""").fetchone()[0]
+    assert sizes + last == buyers
+    assert cr.retention_pct.between(0, 100).all()
+
+
+def test_month_one_retention_matches_a_pandas_recount():
+    cr = run_all(build_db())["cohort_retention"].set_index(["cohort", "months_after"])
+    o = pd.read_csv("data/orders.csv")
+    o = o[o.status != "cancelled"].assign(month=lambda d: pd.PeriodIndex(d.order_date, freq="M"))
+    first = o.groupby("buyer_id").month.min()
+    sept = first[first == pd.Period("2025-09", "M")].index
+    came_back = o[o.buyer_id.isin(sept) & (o.month == pd.Period("2025-10", "M"))].buyer_id.nunique()
+    assert cr.loc[("2025-09", 1), "active_buyers"] == came_back
+    assert cr.loc[("2025-09", 1), "cohort_buyers"] == len(sept)

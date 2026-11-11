@@ -84,3 +84,31 @@ SELECT (SELECT month FROM peak) AS peak_month, dimension, value,
 FROM grouped
 GROUP BY dimension, value
 ORDER BY dimension, value;
+
+-- name: cohort_retention
+-- Buyers grouped by the month of their first non-cancelled order (their cohort), and the share of
+-- each cohort that ordered again 1, 2, and 3 months later.
+WITH o AS (
+  SELECT buyer_id,
+         CAST(substr(order_date, 1, 4) AS INTEGER) * 12 + CAST(substr(order_date, 6, 2) AS INTEGER) AS m
+  FROM orders WHERE status != 'cancelled'
+),
+first AS (SELECT buyer_id, MIN(m) AS start FROM o GROUP BY buyer_id),
+size AS (SELECT start, COUNT(*) AS cohort_buyers FROM first GROUP BY start),
+active AS (
+  SELECT f.start, o.m - f.start AS months_after, COUNT(DISTINCT o.buyer_id) AS active_buyers
+  FROM o JOIN first f USING (buyer_id)
+  WHERE o.m - f.start BETWEEN 1 AND 3
+  GROUP BY f.start, months_after
+),
+grid AS (
+  SELECT s.start, s.cohort_buyers, n.months_after
+  FROM size s CROSS JOIN (SELECT 1 AS months_after UNION ALL SELECT 2 UNION ALL SELECT 3) n
+  WHERE s.start + n.months_after <= (SELECT MAX(m) FROM o)
+)
+SELECT printf('%04d-%02d', (g.start - 1) / 12, (g.start - 1) % 12 + 1) AS cohort,
+       g.cohort_buyers, g.months_after,
+       COALESCE(a.active_buyers, 0) AS active_buyers,
+       ROUND(100.0 * COALESCE(a.active_buyers, 0) / g.cohort_buyers, 1) AS retention_pct
+FROM grid g LEFT JOIN active a ON a.start = g.start AND a.months_after = g.months_after
+ORDER BY cohort, g.months_after;

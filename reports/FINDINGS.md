@@ -33,7 +33,14 @@ Repeat buyers are 508 of 778 buyers but account for
 **94%** of spend (average $2,747 against $324 for one-time buyers).
 Recommendation: put effort into getting a second order from new buyers.
 
-## 4. Revenue overview
+## 4. Most new buyers do not come back the next month
+Across cohorts of at least 20 buyers, **42%** of new buyers placed another order the
+month after their first one (cohort range 28.8% to 48.3%, see `cohort_retention.csv`).
+The August cohort, which started during the cancellation spike, came back at **34.2%**. That is
+below average, but July's cohort (28.8%) was lower without any spike, so this data cannot show that the
+spike drove new buyers away. Together with finding 3, the biggest lever is the second order.
+
+## 5. Revenue overview
 Best month for GMV was **2025-11** ($382,595). The top category by GMV
 was **Beverages** ($467,862).
 

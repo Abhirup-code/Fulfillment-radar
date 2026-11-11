@@ -4,6 +4,7 @@ import re
 import sqlite3
 from pathlib import Path
 import pandas as pd
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -36,6 +37,7 @@ def run_all(con):
     return r
 
 
+MIN_COHORT = 20  # smaller cohorts swing too much to compare
 ON_TIME_TARGET = 85.0  # the on-time rate a seller is expected to hold, in percent
 
 
@@ -115,6 +117,20 @@ def charts(r, outdir):
     ax.legend()
     fig.tight_layout(); fig.savefig(outdir / "cancellation_drilldown.png", dpi=130); plt.close(fig)
 
+    h = r["cohort_retention"].pivot(index="cohort", columns="months_after", values="retention_pct")
+    sizes = r["cohort_retention"].drop_duplicates("cohort").set_index("cohort")["cohort_buyers"]
+    fig, ax = plt.subplots(figsize=(6, 5))
+    im = ax.imshow(h.values, cmap="Blues", vmin=0, vmax=100, aspect="auto")
+    ax.set_xticks(range(len(h.columns)), [f"+{c} mo" for c in h.columns])
+    ax.set_yticks(range(len(h.index)), [f"{c} ({sizes[c]})" for c in h.index])
+    for (i, j), v in np.ndenumerate(h.values):
+        if not np.isnan(v):
+            ax.text(j, i, f"{v:.0f}%", ha="center", va="center", color="white" if v > 55 else "black", fontsize=9)
+    ax.set_title("Buyers ordering again, by first-order month")
+    ax.set_ylabel("Cohort (buyers)")
+    fig.colorbar(im, ax=ax, label="%")
+    fig.tight_layout(); fig.savefig(outdir / "cohort_retention.png", dpi=130); plt.close(fig)
+
     s = r["seller_on_time"].head(10)
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.barh(s["seller_id"].astype(str), s["on_time_pct"], color="#dd6b20")
@@ -137,6 +153,12 @@ def findings(r):
     peak = c.loc[c["cancel_rate_pct"].idxmax()]
     typical = c.loc[c["month"] != peak["month"], "cancel_rate_pct"].median()
     rep, one = rv.loc["repeat"], rv.loc["one-time"]
+    cr = r["cohort_retention"]
+    m1 = cr[(cr.months_after == 1) & (cr.cohort_buyers >= MIN_COHORT)]
+    ret1 = 100 * m1.active_buyers.sum() / m1.cohort_buyers.sum()
+    ret1_lo, ret1_hi = m1.retention_pct.min(), m1.retention_pct.max()
+    aug1 = m1.set_index("cohort").loc["2025-08", "retention_pct"]
+    jul1 = m1.set_index("cohort").loc["2025-07", "retention_pct"]
     share = 100 * rep["total_spend"] / (rep["total_spend"] + one["total_spend"])
     best_month = m.loc[m["gmv"].idxmax()]
     cat = r["category_performance"].iloc[0]
@@ -175,7 +197,14 @@ Repeat buyers are {int(rep['buyers'])} of {int(rep['buyers'] + one['buyers'])} b
 **{share:.0f}%** of spend (average ${rep['avg_spend']:,.0f} against ${one['avg_spend']:,.0f} for one-time buyers).
 Recommendation: put effort into getting a second order from new buyers.
 
-## 4. Revenue overview
+## 4. Most new buyers do not come back the next month
+Across cohorts of at least {MIN_COHORT} buyers, **{ret1:.0f}%** of new buyers placed another order the
+month after their first one (cohort range {ret1_lo}% to {ret1_hi}%, see `cohort_retention.csv`).
+The August cohort, which started during the cancellation spike, came back at **{aug1}%**. That is
+below average, but July's cohort ({jul1}%) was lower without any spike, so this data cannot show that the
+spike drove new buyers away. Together with finding 3, the biggest lever is the second order.
+
+## 5. Revenue overview
 Best month for GMV was **{best_month['month']}** (${best_month['gmv']:,.0f}). The top category by GMV
 was **{cat['category']}** (${cat['gmv']:,.0f}).
 

@@ -17,6 +17,7 @@ SQL and Python analytics for a B2B food-supply marketplace: monthly revenue, ord
 | Which sellers deliver late? | seller_on_time |
 | Which of them are really below target, not just unlucky? | seller_flags (95% confidence intervals) |
 | Do repeat buyers matter more than one-time buyers? | repeat_vs_one_time |
+| Do new buyers come back 1, 2, and 3 months later? | cohort_retention |
 | Which categories earn the most? | category_performance |
 
 Results are written to `reports/` as CSV files, charts, and a short written summary in [`reports/FINDINGS.md`](reports/FINDINGS.md).
@@ -32,6 +33,8 @@ Results are written to `reports/` as CSV files, charts, and a short written summ
 ![Lowest on-time sellers](reports/charts/seller_on_time.png)
 
 ![Repeat vs one-time buyers](reports/charts/repeat_vs_one_time.png)
+
+![Cohort retention](reports/charts/cohort_retention.png)
 
 ![GMV by category](reports/charts/category_gmv.png)
 
@@ -55,6 +58,8 @@ The tests check that the data is deterministic, that there are no orphan foreign
 - **Below target** means even the top of a seller's 95% Wilson confidence interval is under 85%.
   Sellers whose interval includes 85% are "too close to call", not flagged.
 - **Repeat buyer** means two or more non-cancelled orders.
+- **Cohort** means the month of a buyer's first non-cancelled order. Retention compares only cohorts
+  of 20 or more buyers, because smaller ones swing too much.
 
 ## License
 
